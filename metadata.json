@@ -1,0 +1,8 @@
+{
+  "name": "ASD Hobby Sport Iurizzi",
+  "description": "Corsi di Kick Boxing, Functional Training, Ginnastica Posturale e Avviamento allo Sport a Orta Nova (Fg) con i Maestri Nicola e Fabio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
