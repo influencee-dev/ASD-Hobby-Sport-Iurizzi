@@ -75,11 +75,24 @@ async function startServer() {
       });
 
       if (!brevoResponse.ok) {
-        const errText = await brevoResponse.text();
-        console.error(`[Brevo API] Fallito con status ${brevoResponse.status}: ${errText}`);
+        let errMessage = brevoResponse.statusText || "Errore sconosciuto";
+        try {
+          // Clone response so we can try to read as JSON first, then fallback to text
+          const cloneResponse = brevoResponse.clone();
+          const errJson = await cloneResponse.json();
+          if (errJson && typeof errJson === "object") {
+            errMessage = errJson.message || errJson.code || JSON.stringify(errJson);
+          }
+        } catch (e) {
+          try {
+            const errText = await brevoResponse.text();
+            if (errText) errMessage = errText;
+          } catch (e2) {}
+        }
+        console.error(`[Brevo API] Fallito con status ${brevoResponse.status}: ${errMessage}`);
         return res.status(brevoResponse.status).json({
           success: false,
-          error: `Errore durante il salvataggio su Brevo: ${errText || brevoResponse.statusText}`
+          error: `Errore durante il salvataggio su Brevo: ${errMessage}`
         });
       }
 
