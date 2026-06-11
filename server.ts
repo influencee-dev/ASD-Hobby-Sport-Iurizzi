@@ -5,12 +5,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+export const app = express();
+const PORT = 3000;
 
-  // Middleware to parse JSON body payloads
-  app.use(express.json());
+// Middleware to parse JSON body payloads
+app.use(express.json());
 
   // API Routes - IMPORTANT: Declare these before mounting Vite middleware
   app.post("/api/preiscrizione", async (req: express.Request, res: express.Response) => {
@@ -158,6 +157,7 @@ async function startServer() {
     }
   });
 
+async function startServer() {
   // Mount Vite development server or serve static dist folder in production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -178,4 +178,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
