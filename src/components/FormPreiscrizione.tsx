@@ -115,13 +115,6 @@ export default function FormPreiscrizione() {
         
         setSubmittedWaLink(dynamicWaLink);
         setStatus("success");
-
-        // Open WhatsApp directly for immediate interactive dispatch
-        try {
-          window.open(dynamicWaLink, "_blank");
-        } catch (popupError) {
-          console.warn("Popup bloccato dal browser, l'utente può fare clic sul pulsante dedicato nella schermata successiva.", popupError);
-        }
       } else {
         showError(result.error || "Si è verificato un errore durante l'invio. Riprova.");
       }
