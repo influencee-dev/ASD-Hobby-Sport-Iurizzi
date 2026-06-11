@@ -2,9 +2,13 @@ import { PhoneCall, CalendarPlus, ChevronDown } from "lucide-react";
 
 export default function Hero() {
   const scrollSmoothTo = (href: string) => {
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
+    try {
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    } catch (err) {
+      console.warn("scrollIntoView fallito nell'ambiente iframe, fallback locale:", err);
     }
   };
 

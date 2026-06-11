@@ -82,7 +82,7 @@ export default function FormPreiscrizione() {
         body: JSON.stringify(formData),
       });
 
-      let result: any;
+      let result: any = null;
       const contentType = response.headers.get("content-type");
       
       if (contentType && contentType.includes("application/json")) {
@@ -93,19 +93,28 @@ export default function FormPreiscrizione() {
         throw new Error(`Il server ha risposto con formato non caricabile (Status: ${response.status}). Per chiarimenti immediati, puoi contattarci su WhatsApp.`);
       }
 
-      if (response.ok && result.success) {
+      if (response.ok && result && result.success) {
         // Build dynamic WhatsApp prefilled message containing custom user inputs
+        const parent = formData.parentName || "Non specificato";
+        const child = formData.childName || "Non specificato";
+        const age = formData.childAge || "Non specificato";
+        const phoneNo = formData.phone || "Non specificato";
+        const emailAddr = formData.email || "Non specificato";
+        const selCourse = formData.course || "Non specificato";
+        const prevExp = formData.experience || "Nessuna";
+        const noteMsg = (formData.message || "").trim();
+
         const messageLines = [
           `*ASD HOBBY SPORT ORTA NOVA - RICHIESTA PREISCRIZIONE*`,
           `-----------------------------------------`,
-          `👨‍👩‍👦 *Genitore/Tutore:* ${formData.parentName}`,
-          `👦 *Allievo/a:* ${formData.childName}`,
-          `🎂 *Età:* ${formData.childAge} anni`,
-          `📞 *Telefono:* ${formData.phone}`,
-          `✉️ *Email:* ${formData.email}`,
-          `🥋 *Corso richiesto:* ${formData.course}`,
-          `💪 *Esperienza sportiva:* ${formData.experience}`,
-          formData.message.trim() ? `💬 *Messaggio/Note:* ${formData.message}` : "",
+          `👨‍👩‍👦 *Genitore/Tutore:* ${parent}`,
+          `👦 *Allievo/a:* ${child}`,
+          `🎂 *Età:* ${age} anni`,
+          `📞 *Telefono:* ${phoneNo}`,
+          `✉️ *Email:* ${emailAddr}`,
+          `🥋 *Corso richiesto:* ${selCourse}`,
+          `💪 *Esperienza sportiva:* ${prevExp}`,
+          noteMsg ? `💬 *Messaggio/Note:* ${noteMsg}` : "",
           `-----------------------------------------`,
           `_Inviato dal sito web Hobby Sport Orta Nova_`
         ];
@@ -116,7 +125,7 @@ export default function FormPreiscrizione() {
         setSubmittedWaLink(dynamicWaLink);
         setStatus("success");
       } else {
-        showError(result.error || "Si è verificato un errore durante l'invio. Riprova.");
+        showError((result && result.error) || "Si è verificato un errore durante l'invio. Riprova.");
       }
     } catch (err: any) {
       console.error("Errore di connessione o elaborazione al server:", err);
@@ -130,7 +139,11 @@ export default function FormPreiscrizione() {
     setErrorMessage(msg);
     setStatus("error");
     // Scroll slightly to let the error box catch attention
-    document.getElementById("error-zone")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    try {
+      document.getElementById("error-zone")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (scrollError) {
+      console.warn("Element scrollIntoView error ignored in sandboxed iframe environment:", scrollError);
+    }
   };
 
   const handleReset = () => {

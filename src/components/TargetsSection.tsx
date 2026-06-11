@@ -71,7 +71,11 @@ export default function TargetsSection() {
                   className="font-mono text-xs text-gray-500 hover:text-brand-red transition-colors duration-200 uppercase tracking-widest inline-flex items-center space-x-1"
                   onClick={(e) => {
                     e.preventDefault();
-                    document.getElementById("preiscrizione")?.scrollIntoView({ behavior: "smooth" });
+                    try {
+                      document.getElementById("preiscrizione")?.scrollIntoView({ behavior: "smooth" });
+                    } catch (err) {
+                      console.warn("scrollIntoView fallito nell'ambiente iframe, fallback locale:", err);
+                    }
                   }}
                 >
                   <span>Chiedi informazioni</span>
