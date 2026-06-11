@@ -49,6 +49,25 @@ async function startServer() {
         });
       }
 
+      // Helper to clean and format telephone numbers following Brevo's SMS strict validation (starts with + or country code, no spaces/special chars)
+      const normalizePhoneForBrevo = (rawPhone: string): string => {
+        let cleaned = rawPhone.replace(/[^\d+]/g, ""); // Keep only digits and '+'
+        if (cleaned.startsWith("00")) {
+          cleaned = "+" + cleaned.slice(2);
+        }
+        if (!cleaned.startsWith("+")) {
+          if (cleaned.startsWith("39") && cleaned.length >= 11) {
+            cleaned = "+" + cleaned;
+          } else {
+            // Assume Italian fallback (+39) for typical 10-digit local mobile numbers
+            cleaned = "+39" + cleaned;
+          }
+        }
+        return cleaned;
+      };
+
+      const normalizedSMS = normalizePhoneForBrevo(phone);
+
       // Save or update the contact on Brevo using POST https://api.brevo.com/v3/contacts
       // Payload must contain email, attributes FIRSTNAME, LASTNAME, SMS, listIds and updateEnabled: true
       const payload = {
@@ -56,7 +75,7 @@ async function startServer() {
         attributes: {
           FIRSTNAME: firstName,
           LASTNAME: lastName,
-          SMS: phone
+          SMS: normalizedSMS
         },
         listIds: [BREVO_LIST_ID],
         updateEnabled: true

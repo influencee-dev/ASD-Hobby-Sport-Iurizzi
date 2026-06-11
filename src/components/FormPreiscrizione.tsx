@@ -89,8 +89,29 @@ export default function FormPreiscrizione() {
       if (response.ok && result && result.success && result.whatsappUrl) {
         setStatus("success");
         setSubmittedWaLink(result.whatsappUrl);
-        // Redirect directly to the processed whatsapp link as per key instruction
-        window.location.href = result.whatsappUrl;
+        
+        // Attempt 1: Safe trigger for a new tab (ideal for a WhatsApp App launch)
+        try {
+          window.open(result.whatsappUrl, "_blank");
+        } catch (openErr) {
+          console.warn("window.open blocked by sandbox or blocker:", openErr);
+        }
+
+        // Attempt 2: Target main upper window if possible, fallback to current frame
+        try {
+          if (window.top) {
+            window.top.location.href = result.whatsappUrl;
+          } else {
+            window.location.href = result.whatsappUrl;
+          }
+        } catch (redirectErr) {
+          console.warn("Top frame block, attempting local frame location direct change", redirectErr);
+          try {
+            window.location.href = result.whatsappUrl;
+          } catch (localErr) {
+            console.error("Local frame location blocked:", localErr);
+          }
+        }
       } else {
         showError((result && result.error) || "Si è verificato un errore durante l'invio. Riprova.");
       }
