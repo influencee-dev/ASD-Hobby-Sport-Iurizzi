@@ -77,11 +77,21 @@ export default function FormPreiscrizione() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json"
         },
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      let result: any;
+      const contentType = response.headers.get("content-type");
+      
+      if (contentType && contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        const textResponse = await response.text();
+        console.error("Risposta non JSON ricevuta dal server:", textResponse);
+        throw new Error(`Il server ha risposto con formato non caricabile (Status: ${response.status}). Per chiarimenti immediati, puoi contattarci su WhatsApp.`);
+      }
 
       if (response.ok && result.success) {
         // Build dynamic WhatsApp prefilled message containing custom user inputs
@@ -115,9 +125,9 @@ export default function FormPreiscrizione() {
       } else {
         showError(result.error || "Si è verificato un errore durante l'invio. Riprova.");
       }
-    } catch (err) {
-      console.error("Errore di connessione al server:", err);
-      showError("Connessione di rete non riuscita. Verifica la connessione e riprova.");
+    } catch (err: any) {
+      console.error("Errore di connessione o elaborazione al server:", err);
+      showError(err.message || "Connessione di rete non riuscita. Verifica la connessione e riprova.");
     } finally {
       setLoading(false);
     }
