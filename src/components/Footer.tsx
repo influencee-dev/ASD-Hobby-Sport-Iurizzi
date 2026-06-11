@@ -1,4 +1,5 @@
 import React from "react";
+import { Facebook, Instagram } from "lucide-react";
 
 interface FooterProps {
   onOpenPrivacy: (initialTab: "privacy" | "cookies") => void;
@@ -37,6 +38,26 @@ export default function Footer({ onOpenPrivacy }: FooterProps) {
               Associazione Sportiva Dilettantistica affiliata al CONI, FPI e Federkombat. 
               Promuoviamo sport sani, coordinazione psicomotoria, disciplina classica ed autocontrollo.
             </p>
+            <div className="flex items-center space-x-4 pt-1">
+              <a
+                href="https://www.facebook.com/profile.php?id=100063559683497"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-brand-red transition-colors duration-200 p-1.5 bg-white rounded-full border border-gray-200 shadow-xs"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/nicola.iurizzi/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-brand-red transition-colors duration-200 p-1.5 bg-white rounded-full border border-gray-200 shadow-xs"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* Core Slogan Ticker column */}
