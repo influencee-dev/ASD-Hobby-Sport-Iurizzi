@@ -1,5 +1,6 @@
 export interface LeadFormData {
-  parentName: string;
+  firstName: string;
+  lastName: string;
   childName: string;
   childAge: string;
   phone: string;

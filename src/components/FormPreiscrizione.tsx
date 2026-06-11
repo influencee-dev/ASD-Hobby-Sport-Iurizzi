@@ -5,7 +5,8 @@ import { CONTACT_INFO } from "../data";
 
 export default function FormPreiscrizione() {
   const [formData, setFormData] = useState<LeadFormData>({
-    parentName: "",
+    firstName: "",
+    lastName: "",
     childName: "",
     childAge: "",
     phone: "",
@@ -39,16 +40,12 @@ export default function FormPreiscrizione() {
     e.preventDefault();
     
     // Basic validations
-    if (!formData.parentName.trim()) {
-      showError("Il nome del genitore è obbligatorio.");
+    if (!formData.firstName.trim()) {
+      showError("Il nome è obbligatorio.");
       return;
     }
-    if (!formData.childName.trim()) {
-      showError("Il nome dell'allievo/a è obbligatorio.");
-      return;
-    }
-    if (!formData.childAge.trim() || isNaN(Number(formData.childAge))) {
-      showError("Inserisci un'eta numerica valida per l'allievo/a.");
+    if (!formData.lastName.trim()) {
+      showError("Il cognome è obbligatorio.");
       return;
     }
     if (!formData.phone.trim()) {
@@ -69,11 +66,7 @@ export default function FormPreiscrizione() {
     setErrorMessage("");
 
     try {
-      /**
-       * Qui colleghiamo l'API Brevo passando l'intero pacchetto del modulo pre-iscrizione.
-       * Il backend prenderà in carico l'inserimento/aggiornamento sicuro del contatto.
-       */
-      const response = await fetch("/api/brevo-preiscrizione", {
+      const response = await fetch("/api/preiscrizione", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,40 +83,14 @@ export default function FormPreiscrizione() {
       } else {
         const textResponse = await response.text();
         console.error("Risposta non JSON ricevuta dal server:", textResponse);
-        throw new Error(`Il server ha risposto con formato non caricabile (Status: ${response.status}). Per chiarimenti immediati, puoi contattarci su WhatsApp.`);
+        throw new Error(`Il server ha risposto con formato non caricabile (Status: ${response.status}).`);
       }
 
-      if (response.ok && result && result.success) {
-        // Build dynamic WhatsApp prefilled message containing custom user inputs
-        const parent = formData.parentName || "Non specificato";
-        const child = formData.childName || "Non specificato";
-        const age = formData.childAge || "Non specificato";
-        const phoneNo = formData.phone || "Non specificato";
-        const emailAddr = formData.email || "Non specificato";
-        const selCourse = formData.course || "Non specificato";
-        const prevExp = formData.experience || "Nessuna";
-        const noteMsg = (formData.message || "").trim();
-
-        const messageLines = [
-          `*ASD HOBBY SPORT ORTA NOVA - RICHIESTA PREISCRIZIONE*`,
-          `-----------------------------------------`,
-          `👨‍👩‍👦 *Genitore/Tutore:* ${parent}`,
-          `👦 *Allievo/a:* ${child}`,
-          `🎂 *Età:* ${age} anni`,
-          `📞 *Telefono:* ${phoneNo}`,
-          `✉️ *Email:* ${emailAddr}`,
-          `🥋 *Corso richiesto:* ${selCourse}`,
-          `💪 *Esperienza sportiva:* ${prevExp}`,
-          noteMsg ? `💬 *Messaggio/Note:* ${noteMsg}` : "",
-          `-----------------------------------------`,
-          `_Inviato dal sito web Hobby Sport Orta Nova_`
-        ];
-        
-        const compiledMessage = messageLines.filter(line => line !== "").join("\n");
-        const dynamicWaLink = `https://wa.me/393664691636?text=${encodeURIComponent(compiledMessage)}`;
-        
-        setSubmittedWaLink(dynamicWaLink);
+      if (response.ok && result && result.success && result.whatsappUrl) {
         setStatus("success");
+        setSubmittedWaLink(result.whatsappUrl);
+        // Redirect directly to the processed whatsapp link as per key instruction
+        window.location.href = result.whatsappUrl;
       } else {
         showError((result && result.error) || "Si è verificato un errore durante l'invio. Riprova.");
       }
@@ -166,7 +133,8 @@ export default function FormPreiscrizione() {
 
   const handleReset = () => {
     setFormData({
-      parentName: "",
+      firstName: "",
+      lastName: "",
       childName: "",
       childAge: "",
       phone: "",
@@ -284,23 +252,42 @@ export default function FormPreiscrizione() {
             <form onSubmit={handleSubmit} className="space-y-6">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Parent's Full Name */}
+                {/* First Name */}
                 <div className="flex flex-col space-y-2">
-                  <label htmlFor="parentName" className="font-mono text-xs text-gray-750 uppercase tracking-wider font-bold">
-                    Nome e cognome del Genitore / Tutore <span className="text-brand-red">*</span>
+                  <label htmlFor="firstName" className="font-mono text-xs text-gray-750 uppercase tracking-wider font-bold">
+                    Nome <span className="text-brand-red">*</span>
                   </label>
                   <input
                     type="text"
-                    id="parentName"
-                    name="parentName"
+                    id="firstName"
+                    name="firstName"
                     required
-                    value={formData.parentName}
+                    value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="Es. Mario Rossi"
+                    placeholder="Es. Mario"
                     className="bg-white border border-gray-300 focus:border-brand-red focus:ring-1 focus:ring-brand-red focus:outline-none rounded-lg p-3 text-gray-900 placeholder-gray-400 text-sm sm:text-base font-sans transition-all duration-200"
                   />
                 </div>
 
+                {/* Last Name */}
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="lastName" className="font-mono text-xs text-gray-750 uppercase tracking-wider font-bold">
+                    Cognome <span className="text-brand-red">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Es. Rossi"
+                    className="bg-white border border-gray-300 focus:border-brand-red focus:ring-1 focus:ring-brand-red focus:outline-none rounded-lg p-3 text-gray-900 placeholder-gray-400 text-sm sm:text-base font-sans transition-all duration-200"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Kid's Full Name */}
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="childName" className="font-mono text-xs text-gray-750 uppercase tracking-wider font-bold">
@@ -317,9 +304,7 @@ export default function FormPreiscrizione() {
                     className="bg-white border border-gray-300 focus:border-brand-red focus:ring-1 focus:ring-brand-red focus:outline-none rounded-lg p-3 text-gray-900 placeholder-gray-400 text-sm sm:text-base font-sans transition-all duration-200"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Kid's Age */}
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="childAge" className="font-mono text-xs text-gray-750 uppercase tracking-wider font-bold">
@@ -338,7 +323,9 @@ export default function FormPreiscrizione() {
                     className="bg-white border border-gray-300 focus:border-brand-red focus:ring-1 focus:ring-brand-red focus:outline-none rounded-lg p-3 text-gray-900 placeholder-gray-400 text-sm sm:text-base font-sans transition-all duration-200"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Telephone */}
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="phone" className="font-mono text-xs text-gray-750 uppercase tracking-wider font-bold">
