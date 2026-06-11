@@ -135,8 +135,26 @@ export default function FormPreiscrizione() {
     }
   };
 
-  const showError = (msg: string) => {
-    setErrorMessage(msg);
+  const showError = (msg: any) => {
+    let finalMsg = "";
+    if (typeof msg === "string") {
+      finalMsg = msg;
+    } else if (msg && typeof msg === "object") {
+      // Safely extract from nested structures, e.g., { message: "..." }, { error: "..." }, { code: ..., message: ... }
+      if (typeof msg.message === "string") {
+        finalMsg = msg.message;
+      } else if (typeof msg.error === "string") {
+        finalMsg = msg.error;
+      } else if (msg.error && typeof msg.error === "object" && typeof msg.error.message === "string") {
+        finalMsg = msg.error.message;
+      } else {
+        finalMsg = JSON.stringify(msg);
+      }
+    } else {
+      finalMsg = String(msg || "Errore imprevisto");
+    }
+
+    setErrorMessage(finalMsg);
     setStatus("error");
     // Scroll slightly to let the error box catch attention
     try {
